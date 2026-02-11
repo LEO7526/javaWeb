@@ -9,24 +9,56 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Student Input Form</title>
     </head>
     <body>
         <h1>Student Information Form</h1>
-        <form action="StudentInfoServlet" method="get">
-            <label for="studentId">Student ID:</label><br/>
-            <input type="text" id="studentId" name="studentId" required /><br/><br/>
+        <form action="StudentInfoServlet" method="post">
             
-            <label for="studentName">Student Name:</label><br/>
-            <input type="text" id="studentName" name="studentName" required /><br/><br/>
+            <!-- Personal Particular -->
+            <fieldset>
+                <legend>Personal Particular</legend>
+                <label for="studentName">Name:</label><br/>
+                <input type="text" id="studentName" name="studentName"  /><br/><br/>
+                
+                <label for="password">Password:</label><br/>
+                <input type="password" id="password" name="password"  /><br/><br/>
+                
+                <label>Gender:</label><br/>
+                <input type="radio" id="male" name="gender" value="Male"  />
+                <label for="male">Male</label>
+                <input type="radio" id="female" name="gender" value="Female" />
+                <label for="female">Female</label><br/><br/>
+                
+                <label for="campus">Campus:</label><br/>
+                <select id="campus" name="campus" >
+                    <option value="Tsing yi">Tsing yi</option>
+                    <option value="Tuen Mun">Tuen Mun</option>
+                </select><br/><br/>
+            </fieldset>
             
-            <label for="email">Email:</label><br/>
-            <input type="email" id="email" name="email" required /><br/><br/>
+            <!-- Languages -->
+            <fieldset>
+                <legend>Languages</legend>
+                <input type="checkbox" id="java" name="language" value="Java" />
+                <label for="java">Java</label>
+                <input type="checkbox" id="c" name="language" value="C/C++" />
+                <label for="c">C/C++</label>
+                <input type="checkbox" id="csharp" name="language" value="C#" />
+                <label for="csharp">C#</label><br/><br/>
+            </fieldset>
             
-            <label for="major">Major:</label><br/>
-            <input type="text" id="major" name="major" required /><br/><br/>
+            <!-- Instruction -->
+            <fieldset>
+                <legend>Instruction</legend>
+                <textarea id="instruction" name="instruction" rows="4" cols="40" placeholder="Enter your instruction here..."></textarea><br/><br/>
+            </fieldset>
             
-            <input type="submit" value="Submit">
+            <input type="hidden" name="secret" value="888"  />
+            
+            <!-- Buttons -->
+            <input type="submit" value="SEND" />
+            <input type="reset" value="CLEAR" />
         </form>
     </body>
 </html>

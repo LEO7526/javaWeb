@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet for handling student information submissions
- * 
+ *
  * @author a1
  */
 @WebServlet(name = "StudentInfoServlet", urlPatterns = {"/StudentInfoServlet"})
@@ -29,31 +29,60 @@ public class StudentInfoServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        
-        String studentId = request.getParameter("studentId");
+
         String studentName = request.getParameter("studentName");
-        String email = request.getParameter("email");
-        String major = request.getParameter("major");
-        
+        String password = request.getParameter("password");
+        String gender = request.getParameter("gender");
+        String campus = request.getParameter("campus");
+        String[] languages = request.getParameterValues("language");
+        String instruction = request.getParameter("instruction");
+
+        String secret = request.getParameter("secret");
+
+        String missing = "MISSING";
+
         try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Student Information</title>");            
+            out.println("<title>Student Information</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Student Information Submitted</h1>");
-            
-            if (studentId != null && studentName != null && email != null && major != null) {
-                out.println("<p><strong>Student ID:</strong> " + HtmlUtil.escapeHtml(studentId) + "</p>");
-                out.println("<p><strong>Name:</strong> " + HtmlUtil.escapeHtml(studentName) + "</p>");
-                out.println("<p><strong>Email:</strong> " + HtmlUtil.escapeHtml(email) + "</p>");
-                out.println("<p><strong>Major:</strong> " + HtmlUtil.escapeHtml(major) + "</p>");
+            out.println("<h1>You have entered:</h1>");
+
+            // Personal Particular
+            out.println("<p><strong>Name:</strong> " + ((!studentName.isEmpty()) ? studentName : missing) + "</p>");
+            out.println("<p><strong>Password:</strong> " + ((!password.isEmpty()) ? password : missing) + "</p>");
+            out.println("<p><strong>Gender:</strong> " + (gender != null ? gender : missing) + "</p>");
+            out.println("<p><strong>Campus:</strong> " + (campus != null ? campus : missing) + "</p>");
+
+            // Languages
+            out.println("<p><strong>Languages:</strong> ");
+            if (languages != null && languages.length > 0) {
+                for (String lang : languages) {
+                    out.println(lang + " ");
+                }
             } else {
-                out.println("<p>Please provide all required information.</p>");
+                out.print(missing);
             }
+            out.println("</p>");
+
+            // Instruction
+            out.println("<p><strong>Instruction:</strong> " + (instruction != null && !instruction.isEmpty() ? instruction : missing) + "</p>");
+
+            out.println("<p><strong>Secret:</strong>" + (secret != null && !secret.isEmpty() ? secret : missing) + "</p>");
             
-            out.println("<br/><a href=\"studentInfo.jsp\">Submit another form</a>");
+            out.println("<p> " + "<strong>Request Parameter Names are:</strong> " + "</p>");
+            
+            java.util.Enumeration eParams = request.getParameterNames();
+            while (eParams.hasMoreElements()) {
+                String strParam = (String) eParams.nextElement();
+                out.println(strParam);
+            }
+
+            
+
+            out.println("<br/><a href=\"studentInfo.jsp\">BACK</a>");
             out.println("</body>");
             out.println("</html>");
         }
