@@ -1,6 +1,7 @@
 package ict.servlet;
 
 import ict.util.Converter;
+import ict.util.HtmlUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -22,23 +23,23 @@ public class TemperatureServlet extends HttpServlet {
         String conversionType = req.getParameter("conversionType");
         
         out.println("<html>");
-        out.println("<head><title>Temperature Converter</title></head>");
+        out.println("<head><title>Temperature Converter Result</title></head>");
         out.println("<body>");
+        out.println("<h1>Temperature Converter Result</h1>");
         
-        if(tempStr.isEmpty()&&conversionType == null){
+        if (tempStr.isEmpty() && conversionType == null) {
             out.println("<h3>Please select the type of conversion!!</h3>");
             out.println("<h3>Please input a value for the temperature!!</h3>");
             out.println("<a href=\"converter.jsp\">Try again</a>");
         }
         
-        if(tempStr.isEmpty()&&conversionType != null){
+        if (tempStr.isEmpty() && conversionType != null) {
             out.println("<h3>Please input a value for the temperature</h3>");
             out.println("<a href=\"converter.jsp\">Try again</a>");
         }
         
-        if ( !tempStr.isEmpty() && conversionType == null) {
+        if (!tempStr.isEmpty() && conversionType == null) {
             out.println("<h3> Please select the type of conversion!!</h3>");
-//            Please select the type of conversion!!
             out.println("<a href=\"converter.jsp\">Try again</a>");
         } else {
             try {
@@ -57,9 +58,10 @@ public class TemperatureServlet extends HttpServlet {
                     resultMsg = "Invalid conversion type";
                 }
                 
-                out.println("<h3>" + resultMsg + "</h3>");
+                out.println("<p><strong>" + HtmlUtil.escapeHtml(resultMsg) + "</strong></p>");
                 out.println("<br/><a href=\"converter.jsp\">Convert another temperature</a>");
             } catch (NumberFormatException e) {
+                // You can add your own local error handling here if needed
             }
         }
         

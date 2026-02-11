@@ -1,5 +1,6 @@
 package ict.servlet;
 
+import ict.util.HtmlUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -17,24 +18,18 @@ public class Radio extends HttpServlet {
         
         String size = req.getParameter("employee");
         
-        if(size==null){
-            out.println("<html>");
-        out.println("<head><title>radio button</title></head>");
+        out.println("<html>");
+        out.println("<head><title>Company Size Result</title></head>");
         out.println("<body>");
-        out.println("your company size :  " );
-                out.println("</br>");
-        out.println("<a href=\"radio.jsp\">Try again!!</a>");
-        out.println("</body></html>");
+        out.println("<h1>Company Size Result</h1>");
         
-        }else{
-            out.println("<html>");
-        out.println("<head><title>radio button</title></head>");
-        out.println("<body>");
-        out.println("your company size : " + size);
-                        out.println("</br>");
-                out.println("<a href=\"radio.jsp\">Try again!!</a>");
-        out.println("</body></html>");
+        if(size == null || size.isEmpty()){
+            out.println("<p>No company size selected.</p>");
+        } else {
+            out.println("<p>Your company size: <strong>" + HtmlUtil.escapeHtml(size) + "</strong></p>");
         }
-
+        
+        out.println("<br/><a href=\"radio.jsp\">Try again</a>");
+        out.println("</body></html>");
     }
 }
