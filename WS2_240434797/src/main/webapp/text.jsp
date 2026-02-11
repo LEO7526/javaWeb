@@ -9,7 +9,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Text Input Form</title>
+        <title>JSP Page</title>
     </head>
     <body>
         <h1>Hello World!</h1>
@@ -17,8 +17,9 @@
         <p>Please enter your name:</p>
         <form action="hello" method="get">
             <input type="text" name="name">
-            <button type="submit">Submit</button>
+            <button type="submit">submit</button>
         </form>
+        </br>
         
     </body>
 </html>

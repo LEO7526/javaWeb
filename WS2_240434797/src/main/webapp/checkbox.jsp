@@ -5,14 +5,12 @@
         <title>check box</title>
     </head>
     <body>
-        <h1>IDE Selection Survey</h1>
         <form method="get" action="checkbox">
-            <p>What IDEs do you use?</p>
-            <input type="checkbox" name="ide" value="netbean" /> NetBeans<br/>
-            <input type="checkbox" name="ide" value="jdeveloper" /> JDeveloper<br/>
-            <input type="checkbox" name="ide" value="eclipse" /> Eclipse<br/>
-            <br/>
-            <input type="submit" value="Submit">
+            <br/>what ides do you use?<br/>
+            <br/>Netbean <input type="checkbox" name="ide" value="netbean" >
+            <br/>Jdeveloper <input type="checkbox" name="ide" value="jdeveloper"/>
+            <br/>Eclipse?<input type="checkbox" name="ide" value="eclipse" />
+            <br/><input type="submit">
         </form>
     </body>
 </html>

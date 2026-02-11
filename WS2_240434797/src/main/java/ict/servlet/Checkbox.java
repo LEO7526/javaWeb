@@ -1,6 +1,5 @@
 package ict.servlet;
 
-import ict.util.HtmlUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -20,22 +19,14 @@ public class Checkbox extends HttpServlet {
         String[] ideName = req.getParameterValues("ide");
 
         out.println("<html>");
-        out.println("<head><title>IDE Selection Result</title></head>");
+        out.println("<head><title>checkbox button</title></head>");
         out.println("<body>");
-        out.println("<h1>IDE Selection Result</h1>");
-        out.println("<p>Your choices are:</p>");
-        
-        if (ideName != null && ideName.length > 0) {
-            out.println("<ul>");
+        out.println("Your choices are :");
+        if (ideName != null) {
             for (int i = 0; i < ideName.length; i++) {
-                out.println("<li><strong>" + HtmlUtil.escapeHtml(ideName[i]) + "</strong></li>");
+                out.println("<br><b>" + ideName[i] + "</b>");
             }
-            out.println("</ul>");
-        } else {
-            out.println("<p>No IDE selected.</p>");
         }
-        
-        out.println("<br/><a href=\"checkbox.jsp\">Try again</a>");
         out.println("</body></html>");
     }
 }
