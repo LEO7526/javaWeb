@@ -31,15 +31,31 @@ public class StudentInfoServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        
+        String studentId = request.getParameter("studentId");
+        String studentName = request.getParameter("studentName");
+        String email = request.getParameter("email");
+        String major = request.getParameter("major");
+        
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet StudentInfoServlet</title>");            
+            out.println("<title>Student Information</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet StudentInfoServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Student Information Submitted</h1>");
+            
+            if (studentId != null && studentName != null && email != null && major != null) {
+                out.println("<p><strong>Student ID:</strong> " + studentId + "</p>");
+                out.println("<p><strong>Name:</strong> " + studentName + "</p>");
+                out.println("<p><strong>Email:</strong> " + email + "</p>");
+                out.println("<p><strong>Major:</strong> " + major + "</p>");
+            } else {
+                out.println("<p>Please provide all required information.</p>");
+            }
+            
+            out.println("<br/><a href=\"studentInfo.jsp\">Submit another form</a>");
             out.println("</body>");
             out.println("</html>");
         }

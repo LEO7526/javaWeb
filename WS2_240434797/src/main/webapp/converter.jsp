@@ -12,16 +12,16 @@
         <title>Temperature Converter</title>
     </head>
     <body>
-        <p>Choose the temperature type below:</p>
-        </br>
+        <h1>Temperature Converter</h1>
+        <p>Enter a temperature value and select conversion type:</p>
         <form method="get" action="temperature" >
-            <br/>How many employees in your company?<br/>
-            <br/>1-100<input type="radio" name="employee" value="1-100" />
-            <br/>101-200<input type="radio" name="employee" value="101-200" />
-            <br/>201-300<input type="radio" name="employee" value="201-300" />
-            <br/>301-400<input type="radio" name="employee" value="301-400" />
-            <br/>401-more<input type="radio" name="employee" value="401-more" />
-            <br/><input type="submit" value="submit">
+            <label>Temperature: </label>
+            <input type="text" name="temperature" required />
+            <br/><br/>
+            <label>Convert to:</label><br/>
+            <input type="radio" name="conversionType" value="toFahrenheit" required /> Celsius to Fahrenheit<br/>
+            <input type="radio" name="conversionType" value="toCelsius" /> Fahrenheit to Celsius<br/>
+            <br/><input type="submit" value="Convert">
         </form>
     </body>
 </html>

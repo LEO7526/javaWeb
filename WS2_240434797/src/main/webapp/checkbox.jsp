@@ -5,7 +5,7 @@
         <title>check box</title>
     </head>
     <body>
-        <form method="get" action="/WS2_240434797/checkbox">
+        <form method="get" action="checkbox">
             <br/>what ides do you use?<br/>
             <br/>Netbean <input type="checkbox" name="ide" value="netbean" >
             <br/>Jdeveloper <input type="checkbox" name="ide" value="jdeveloper"/>

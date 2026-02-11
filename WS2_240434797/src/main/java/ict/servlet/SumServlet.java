@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author a1
  */
-@WebServlet(name = "n1", urlPatterns = {"/sum"})
+@WebServlet(name = "SumServlet", urlPatterns = {"/sum"})
 public class SumServlet extends HttpServlet {
 
     @Override
@@ -35,13 +35,18 @@ public class SumServlet extends HttpServlet {
         Integer value1 = 0;
         Integer value2 = 0;
 
+        out.println("<html>");
+        out.println("<head><title>Calculator Result</title></head>");
+        out.println("<body>");
+        out.println("<h1>Calculator Result</h1>");
+
 try{
 value1 = Integer.parseInt(n1);
 
 
 }catch(Exception e){
-    out.println("");
     out.println(msg1);
+    out.println("<br/>");
  }
 
 try{
@@ -49,11 +54,13 @@ try{
 value2 = Integer.parseInt(n2);
 
 }catch(Exception e){
-    out.println("</br>");
     out.println(msg2);
+    out.println("<br/>");
  }
-    out.println("</br>");
  out.println("The sum of " + value1 + " and " + value2 + " is " + (value1+value2));
+        out.println("<br/><br/>");
+        out.println("<a href=\"calculateServlet.jsp\">Calculate again</a>");
+        out.println("</body></html>");
         }
         
 }
