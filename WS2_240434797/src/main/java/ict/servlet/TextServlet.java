@@ -16,7 +16,7 @@ public class TextServlet extends HttpServlet {
         PrintWriter out = res.getWriter();
         String name = req.getParameter("name");
         
-        if(name.isEmpty()){
+        if(name == null || name.isEmpty()){
             out.println("<html>");
             out.println("<head><title>Hello World</title></head>");
             out.println("<body>");

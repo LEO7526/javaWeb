@@ -31,18 +31,45 @@ public class StudentInfoServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        
+        String studentId = request.getParameter("studentId");
+        String studentName = request.getParameter("studentName");
+        String email = request.getParameter("email");
+        String major = request.getParameter("major");
+        
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet StudentInfoServlet</title>");            
+            out.println("<title>Student Information</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet StudentInfoServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Student Information Submitted</h1>");
+            
+            if (studentId != null && studentName != null && email != null && major != null) {
+                out.println("<p><strong>Student ID:</strong> " + escapeHtml(studentId) + "</p>");
+                out.println("<p><strong>Name:</strong> " + escapeHtml(studentName) + "</p>");
+                out.println("<p><strong>Email:</strong> " + escapeHtml(email) + "</p>");
+                out.println("<p><strong>Major:</strong> " + escapeHtml(major) + "</p>");
+            } else {
+                out.println("<p>Please provide all required information.</p>");
+            }
+            
+            out.println("<br/><a href=\"studentInfo.jsp\">Submit another form</a>");
             out.println("</body>");
             out.println("</html>");
         }
+    }
+    
+    private String escapeHtml(String input) {
+        if (input == null) {
+            return "";
+        }
+        return input.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#x27;");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
