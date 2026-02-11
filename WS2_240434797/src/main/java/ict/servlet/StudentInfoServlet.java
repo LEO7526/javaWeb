@@ -47,10 +47,10 @@ public class StudentInfoServlet extends HttpServlet {
             out.println("<h1>Student Information Submitted</h1>");
             
             if (studentId != null && studentName != null && email != null && major != null) {
-                out.println("<p><strong>Student ID:</strong> " + studentId + "</p>");
-                out.println("<p><strong>Name:</strong> " + studentName + "</p>");
-                out.println("<p><strong>Email:</strong> " + email + "</p>");
-                out.println("<p><strong>Major:</strong> " + major + "</p>");
+                out.println("<p><strong>Student ID:</strong> " + escapeHtml(studentId) + "</p>");
+                out.println("<p><strong>Name:</strong> " + escapeHtml(studentName) + "</p>");
+                out.println("<p><strong>Email:</strong> " + escapeHtml(email) + "</p>");
+                out.println("<p><strong>Major:</strong> " + escapeHtml(major) + "</p>");
             } else {
                 out.println("<p>Please provide all required information.</p>");
             }
@@ -59,6 +59,17 @@ public class StudentInfoServlet extends HttpServlet {
             out.println("</body>");
             out.println("</html>");
         }
+    }
+    
+    private String escapeHtml(String input) {
+        if (input == null) {
+            return "";
+        }
+        return input.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#x27;");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

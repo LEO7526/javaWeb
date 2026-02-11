@@ -37,10 +37,10 @@ public class TemperatureServlet extends HttpServlet {
                 
                 if ("toFahrenheit".equals(conversionType)) {
                     result = converter.toFahrenheit(temp);
-                    resultMsg = temp + "°C = " + String.format("%.2f", result) + "°F";
+                    resultMsg = String.format("%.2f°C = %.2f°F", temp, result);
                 } else if ("toCelsius".equals(conversionType)) {
                     result = converter.toCelsius(temp);
-                    resultMsg = temp + "°F = " + String.format("%.2f", result) + "°C";
+                    resultMsg = String.format("%.2f°F = %.2f°C", temp, result);
                 } else {
                     resultMsg = "Invalid conversion type";
                 }
