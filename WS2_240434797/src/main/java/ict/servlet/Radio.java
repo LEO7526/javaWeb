@@ -1,5 +1,6 @@
 package ict.servlet;
 
+import ict.util.HtmlUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -25,21 +26,10 @@ public class Radio extends HttpServlet {
         if(size == null || size.isEmpty()){
             out.println("<p>No company size selected.</p>");
         } else {
-            out.println("<p>Your company size: <strong>" + escapeHtml(size) + "</strong></p>");
+            out.println("<p>Your company size: <strong>" + HtmlUtil.escapeHtml(size) + "</strong></p>");
         }
         
         out.println("<br/><a href=\"radio.jsp\">Try again</a>");
         out.println("</body></html>");
-    }
-    
-    private String escapeHtml(String input) {
-        if (input == null) {
-            return "";
-        }
-        return input.replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                    .replace("\"", "&quot;")
-                    .replace("'", "&#x27;");
     }
 }

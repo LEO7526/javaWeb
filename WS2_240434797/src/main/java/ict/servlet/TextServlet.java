@@ -1,5 +1,6 @@
 package ict.servlet;
 
+import ict.util.HtmlUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.*;
@@ -26,22 +27,11 @@ public class TextServlet extends HttpServlet {
             out.println("</body></html>");
         }else{
             out.println("<html>");
-            out.println("<head><title>Hello, " + escapeHtml(name) + "</title></head>");
+            out.println("<head><title>Hello, " + HtmlUtil.escapeHtml(name) + "</title></head>");
             out.println("<body>");
-            out.println("<h1>Hello, " + escapeHtml(name) + "</h1>");
+            out.println("<h1>Hello, " + HtmlUtil.escapeHtml(name) + "</h1>");
             out.println("<br/><a href=\"text.jsp\">Enter another name</a>");
             out.println("</body></html>");
         }
-    }
-    
-    private String escapeHtml(String input) {
-        if (input == null) {
-            return "";
-        }
-        return input.replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                    .replace("\"", "&quot;")
-                    .replace("'", "&#x27;");
     }
 }

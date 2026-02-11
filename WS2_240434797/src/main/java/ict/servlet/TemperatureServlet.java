@@ -1,6 +1,7 @@
 package ict.servlet;
 
 import ict.util.Converter;
+import ict.util.HtmlUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -46,7 +47,7 @@ public class TemperatureServlet extends HttpServlet {
                     resultMsg = "Invalid conversion type";
                 }
                 
-                out.println("<p><strong>" + escapeHtml(resultMsg) + "</strong></p>");
+                out.println("<p><strong>" + HtmlUtil.escapeHtml(resultMsg) + "</strong></p>");
                 out.println("<br/><a href=\"converter.jsp\">Convert another temperature</a>");
             } catch (NumberFormatException e) {
                 out.println("<p style=\"color: red;\">Invalid temperature value. Please enter a valid number.</p>");
@@ -55,16 +56,5 @@ public class TemperatureServlet extends HttpServlet {
         }
         
         out.println("</body></html>");
-    }
-    
-    private String escapeHtml(String input) {
-        if (input == null) {
-            return "";
-        }
-        return input.replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                    .replace("\"", "&quot;")
-                    .replace("'", "&#x27;");
     }
 }
