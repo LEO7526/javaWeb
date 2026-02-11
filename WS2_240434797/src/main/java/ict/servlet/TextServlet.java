@@ -1,6 +1,5 @@
 package ict.servlet;
 
-import ict.util.HtmlUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.*;
@@ -21,17 +20,15 @@ public class TextServlet extends HttpServlet {
             out.println("<html>");
             out.println("<head><title>Hello World</title></head>");
             out.println("<body>");
-            out.println("<h1>Hello World</h1>");
-            out.println("<p>Please enter your name.</p>");
-            out.println("<br/><a href=\"text.jsp\">Try again</a>");
+            out.println("Hello World");
             out.println("</body></html>");
         }else{
             out.println("<html>");
-            out.println("<head><title>Hello, " + HtmlUtil.escapeHtml(name) + "</title></head>");
-            out.println("<body>");
-            out.println("<h1>Hello, " + HtmlUtil.escapeHtml(name) + "</h1>");
-            out.println("<br/><a href=\"text.jsp\">Enter another name</a>");
-            out.println("</body></html>");
+        out.println("<head><title>hello, " + name + "</title></head>");
+        out.println("<body>");
+        out.println("Hello, " + name);
+        out.println("</body></html>");
         }
+        
     }
 }

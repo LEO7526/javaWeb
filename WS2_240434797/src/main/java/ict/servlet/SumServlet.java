@@ -28,8 +28,9 @@ public class SumServlet extends HttpServlet {
         String n1 = req.getParameter("n1");
         String n2 = req.getParameter("n2");
         
-        String msg1 = "Value 1 is an invalid input and assumed to be zero";
-        String msg2 = "Value 2 is an invalid input and assumed to be zero";
+        String error= "Integer only";
+        String msg1 = "Value 1 is an invalid input and assume it is zero";
+        String msg2 = "Value 2 is an invalid input and assume it is zero";
         
         Integer value1 = 0;
         Integer value2 = 0;
@@ -39,21 +40,27 @@ public class SumServlet extends HttpServlet {
         out.println("<body>");
         out.println("<h1>Calculator Result</h1>");
 
-        try {
-            value1 = Integer.parseInt(n1);
-        } catch(Exception e) {
-            out.println("<p style=\"color: orange;\">" + msg1 + "</p>");
-        }
+try{
+value1 = Integer.parseInt(n1);
 
-        try {
-            value2 = Integer.parseInt(n2);
-        } catch(Exception e) {
-            out.println("<p style=\"color: orange;\">" + msg2 + "</p>");
-        }
-        
-        out.println("<p>The sum of <strong>" + value1 + "</strong> and <strong>" + value2 + "</strong> is <strong>" + (value1+value2) + "</strong></p>");
-        out.println("<br/><a href=\"calculateServlet.jsp\">Calculate again</a>");
+
+}catch(Exception e){
+    out.println(msg1);
+    out.println("<br/>");
+ }
+
+try{
+
+value2 = Integer.parseInt(n2);
+
+}catch(Exception e){
+    out.println(msg2);
+    out.println("<br/>");
+ }
+ out.println("The sum of " + value1 + " and " + value2 + " is " + (value1+value2));
+        out.println("<br/><br/>");
+        out.println("<a href=\"calculateServlet.jsp\">Calculate again</a>");
         out.println("</body></html>");
-    }
+        }
         
 }
