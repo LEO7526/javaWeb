@@ -22,12 +22,13 @@ public class TemperatureServlet extends HttpServlet {
         String conversionType = req.getParameter("conversionType");
         
         out.println("<html>");
-        out.println("<head><title>Temperature Converter</title></head>");
+        out.println("<head><title>Temperature Converter Result</title></head>");
         out.println("<body>");
+        out.println("<h1>Temperature Converter Result</h1>");
         
         if (tempStr == null || tempStr.isEmpty() || conversionType == null) {
-            out.println("<h3>Please provide temperature value and conversion type</h3>");
-            out.println("<a href=\"converter.jsp\">Try again</a>");
+            out.println("<p>Please provide temperature value and conversion type.</p>");
+            out.println("<br/><a href=\"converter.jsp\">Try again</a>");
         } else {
             try {
                 double temp = Double.parseDouble(tempStr);
@@ -45,14 +46,25 @@ public class TemperatureServlet extends HttpServlet {
                     resultMsg = "Invalid conversion type";
                 }
                 
-                out.println("<h3>" + resultMsg + "</h3>");
+                out.println("<p><strong>" + escapeHtml(resultMsg) + "</strong></p>");
                 out.println("<br/><a href=\"converter.jsp\">Convert another temperature</a>");
             } catch (NumberFormatException e) {
-                out.println("<h3>Invalid temperature value. Please enter a valid number.</h3>");
-                out.println("<a href=\"converter.jsp\">Try again</a>");
+                out.println("<p style=\"color: red;\">Invalid temperature value. Please enter a valid number.</p>");
+                out.println("<br/><a href=\"converter.jsp\">Try again</a>");
             }
         }
         
         out.println("</body></html>");
+    }
+    
+    private String escapeHtml(String input) {
+        if (input == null) {
+            return "";
+        }
+        return input.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#x27;");
     }
 }

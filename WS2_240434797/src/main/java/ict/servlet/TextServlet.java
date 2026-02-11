@@ -20,15 +20,28 @@ public class TextServlet extends HttpServlet {
             out.println("<html>");
             out.println("<head><title>Hello World</title></head>");
             out.println("<body>");
-            out.println("Hello World");
+            out.println("<h1>Hello World</h1>");
+            out.println("<p>Please enter your name.</p>");
+            out.println("<br/><a href=\"text.jsp\">Try again</a>");
             out.println("</body></html>");
         }else{
             out.println("<html>");
-        out.println("<head><title>hello, " + name + "</title></head>");
-        out.println("<body>");
-        out.println("Hello, " + name);
-        out.println("</body></html>");
+            out.println("<head><title>Hello, " + escapeHtml(name) + "</title></head>");
+            out.println("<body>");
+            out.println("<h1>Hello, " + escapeHtml(name) + "</h1>");
+            out.println("<br/><a href=\"text.jsp\">Enter another name</a>");
+            out.println("</body></html>");
         }
-        
+    }
+    
+    private String escapeHtml(String input) {
+        if (input == null) {
+            return "";
+        }
+        return input.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#x27;");
     }
 }
