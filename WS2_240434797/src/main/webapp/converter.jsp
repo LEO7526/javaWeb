@@ -16,10 +16,10 @@
         <p>Enter a temperature value and select conversion type:</p>
         <form method="get" action="temperature" >
             <label>Temperature: </label>
-            <input type="text" name="temperature" required />
+            <input type="text" name="temperature"  />
             <br/><br/>
             <label>Convert to:</label><br/>
-            <input type="radio" name="conversionType" value="toFahrenheit" required /> Celsius to Fahrenheit<br/>
+            <input type="radio" name="conversionType" value="toFahrenheit" /> Celsius to Fahrenheit<br/>
             <input type="radio" name="conversionType" value="toCelsius" /> Fahrenheit to Celsius<br/>
             <br/><input type="submit" value="Convert">
         </form>

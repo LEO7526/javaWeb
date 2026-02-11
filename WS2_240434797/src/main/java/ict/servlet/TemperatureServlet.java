@@ -25,8 +25,20 @@ public class TemperatureServlet extends HttpServlet {
         out.println("<head><title>Temperature Converter</title></head>");
         out.println("<body>");
         
-        if (tempStr == null || tempStr.isEmpty() || conversionType == null) {
-            out.println("<h3>Please provide temperature value and conversion type</h3>");
+        if(tempStr.isEmpty()&&conversionType == null){
+            out.println("<h3>Please select the type of conversion!!</h3>");
+            out.println("<h3>Please input a value for the temperature!!</h3>");
+            out.println("<a href=\"converter.jsp\">Try again</a>");
+        }
+        
+        if(tempStr.isEmpty()&&conversionType != null){
+            out.println("<h3>Please input a value for the temperature</h3>");
+            out.println("<a href=\"converter.jsp\">Try again</a>");
+        }
+        
+        if ( !tempStr.isEmpty() && conversionType == null) {
+            out.println("<h3> Please select the type of conversion!!</h3>");
+//            Please select the type of conversion!!
             out.println("<a href=\"converter.jsp\">Try again</a>");
         } else {
             try {
@@ -48,8 +60,6 @@ public class TemperatureServlet extends HttpServlet {
                 out.println("<h3>" + resultMsg + "</h3>");
                 out.println("<br/><a href=\"converter.jsp\">Convert another temperature</a>");
             } catch (NumberFormatException e) {
-                out.println("<h3>Invalid temperature value. Please enter a valid number.</h3>");
-                out.println("<a href=\"converter.jsp\">Try again</a>");
             }
         }
         
