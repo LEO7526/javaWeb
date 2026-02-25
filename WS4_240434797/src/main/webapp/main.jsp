@@ -1,17 +1,2 @@
-<%-- 
-    Document   : main
-    Created on : Feb 25, 2026, 11:43:29 AM
-    Author     : a1
---%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>
-    <body>
-        <h1>Hello World!</h1>
-    </body>
-</html>
+<h1>Name: <span style="color:blue">Your Name</span></h1> 
+<h2>Student No: Your Student</h2>
