@@ -1,25 +1,23 @@
 <%-- 
-    Document   : handleCustomer
-    Created on : Feb 25, 2026, 10:45:54 AM
+    Document   : handleCustomer2
+    Created on : Feb 25, 2026, 10:55:00 AM
     Author     : a1
 --%>
 
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
-<%@ page import="java.util.*" %>
 <%@ page import="ict.bean.CustomerBean" %>
-
-<%! 
-    // Declare an ArrayList to temporarily store customers
-    ArrayList<CustomerBean> customers = new ArrayList<CustomerBean>();
-%>
+<%@ page import="ict.bean.CustomersBean" %>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Handle Customer</title>
+    <title>Handle Customer 2</title>
 </head>
 <body>
-    <!-- Create a CustomerBean with id 'c' -->
+    <!-- Create CustomersBean to store list of CustomerBean -->
+    <jsp:useBean id="customersBean" class="ict.bean.CustomersBean" scope="session" />
+
+    <!-- Create a CustomerBean for current input -->
     <jsp:useBean id="c" class="ict.bean.CustomerBean" scope="page" />
 
     <!-- Set properties from input form -->
@@ -29,7 +27,6 @@
     <jsp:setProperty name="c" property="age" />
 
     <p>The customer information are as follows:</p>
-    <!-- Display current inputted values -->
     <p>
         ID: <jsp:getProperty name="c" property="custId" /><br/>
         Name: <jsp:getProperty name="c" property="name" /><br/>
@@ -38,8 +35,8 @@
     </p>
 
     <%
-        // Add the current customer to the list
-        customers.add(c);
+        // Add the current customer to CustomersBean
+        customersBean.addCustomer(c);
     %>
 
     <!-- Display all customers in a table -->
@@ -52,7 +49,7 @@
             <th>Age</th>
         </tr>
         <%
-            for (CustomerBean cust : customers) {
+            for (CustomerBean cust : customersBean.getCustomers()) {
         %>
         <tr>
             <td><%= cust.getCustId() %></td>
@@ -69,4 +66,3 @@
     <p><a href="editCustomer.jsp">Input Again</a></p>
 </body>
 </html>
-

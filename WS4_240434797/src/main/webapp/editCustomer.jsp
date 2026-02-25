@@ -12,9 +12,9 @@
         <title>JSP Page</title>
     </head>
     <body>
-        <form action="handleCustomer.jsp" method="post">
+        <form action="handleCustomer2.jsp" method="post">
         <label for="id">ID:</label>
-        <input type="text" id="id" name="id" value="" /><br/><br/>
+        <input type="text" id="custId" name="custId" value="" /><br/><br/>
 
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" value="" /><br/><br/>

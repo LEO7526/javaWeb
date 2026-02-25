@@ -16,6 +16,7 @@
             <li><a href="calculateInput.jsp">calculateInput.jsp</a></li>
             <li><a href="editCustomer.jsp">customer</a></li>
             <li><a href="template.jsp">template.jsp</a></li>
+            
         </ul>
 
     </body>
