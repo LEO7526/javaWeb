@@ -12,6 +12,20 @@
         <title>JSP Page</title>
     </head>
     <body>
-        <h1>Hello World!</h1>
+        <form action="handleCustomer.jsp" method="post">
+        <label for="id">ID:</label>
+        <input type="text" id="id" name="id" value="" /><br/><br/>
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="" /><br/><br/>
+
+        <label for="tel">Tel:</label>
+        <input type="text" id="tel" name="tel" value="" /><br/><br/>
+
+        <label for="age">Age:</label>
+        <input type="text" id="age" name="age" value="" /><br/><br/>
+
+        <input type="submit" value="Submit" />
+    </form>
     </body>
 </html>
