@@ -1,8 +1,8 @@
 package edu.ive.itp4511.ws4_240434797.resources;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
 
 /**
  *
@@ -18,3 +18,4 @@ public class JakartaEE8Resource {
                 .build();
     }
 }
+

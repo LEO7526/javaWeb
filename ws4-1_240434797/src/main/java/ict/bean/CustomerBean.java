@@ -41,13 +41,20 @@ public class CustomerBean {
   @Override
   public String toString() {
     return "CustomerBean{" +
-            "custid='" + custid + '\'' +
-            ", name='" + name + '\'' +
-            ", tel='" + tel + '\'' +
+            "custid=" + custid +
+            ", name=" + name +
+            ", tel=" + tel +
             ", age=" + age +
             '}';
   }
 
   public CustomerBean() {
+  }
+
+  public CustomerBean(String custid, String name, String tel, int age) {
+    this.custid = custid;
+    this.name = name;
+    this.tel = tel;
+    this.age = age;
   }
 }

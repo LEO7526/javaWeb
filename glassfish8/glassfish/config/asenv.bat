@@ -39,6 +39,7 @@ REM
 REM  This file uses UTF-8 character encoding.
 
 endlocal
+set "AS_JAVA=C:\Program Files\Java\jdk-21.0.6"
 set "AS_DERBY_INSTALL=%AS_INSTALL%\..\javadb"
 set "AS_IMQ_BIN=%AS_INSTALL%\..\mq\bin"
 set "AS_IMQ_LIB=%AS_INSTALL%\..\mq\lib"
