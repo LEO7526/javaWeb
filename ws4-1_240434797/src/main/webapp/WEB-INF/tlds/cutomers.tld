@@ -1,0 +1,6 @@
+<tag>
+    <name>showCustomer</name>
+    <tag-class>ict.tag.CustomerTag</tag-class>
+    <!– define the attribute tag for customers>
+    <!– define the attribute tag for tagType>
+</tag>
