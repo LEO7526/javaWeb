@@ -1,11 +1,14 @@
 package ict.db;
 
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserDB {
     private String dbUrl;
     private String dbUser;
     private String dbPassword;
+    private static final Logger LOGGER = Logger.getLogger(UserDB.class.getName());
 
     public UserDB(String dbUrl, String dbUser, String dbPassword) {
         this.dbUrl = dbUrl;
@@ -22,7 +25,7 @@ public class UserDB {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "MySQL driver not found", ex);
         }
     }
 
@@ -35,7 +38,7 @@ public class UserDB {
                          "password VARCHAR(25))";
             stmt.executeUpdate(sql);
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to create USERINFO table", ex);
         }
     }
 
@@ -49,7 +52,7 @@ public class UserDB {
             ps.setString(3, pwd);
             result = ps.executeUpdate() > 0;
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to insert user record", ex);
         }
         return result;
     }
@@ -66,7 +69,7 @@ public class UserDB {
                 isValid = true;
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to validate user credentials", ex);
         }
         return isValid;
     }

@@ -1,6 +1,7 @@
 package ict.servlet;
 
 import ict.bean.Brand;
+import ict.servlet.AuthUtil;
 import ict.db.BrandsDB;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 @WebServlet(name = "BrandController", urlPatterns = {"/brandController"})
 public class BrandController extends HttpServlet {
@@ -23,8 +23,7 @@ public class BrandController extends HttpServlet {
         String dbUser = getServletContext().getInitParameter("dbUser");
         String dbPassword = getServletContext().getInitParameter("dbPassword");
         db = new BrandsDB(dbUrl, dbUser, dbPassword);
-        db.createPhoneTable();
-        db.seedSampleData();
+        db.initialize();
     }
 
     @Override
@@ -36,8 +35,7 @@ public class BrandController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (!isAuthenticated(request)) {
-            redirectToLogin(request, response);
+        if (!AuthUtil.ensureAuthenticated(request, response, getServletContext())) {
             return;
         }
         String action = request.getParameter("action");
@@ -49,16 +47,5 @@ public class BrandController extends HttpServlet {
         } else {
             response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
         }
-    }
-
-    private boolean isAuthenticated(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        return session != null && session.getAttribute("userInfo") != null;
-    }
-
-    private void redirectToLogin(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.jsp");
-        rd.forward(request, response);
     }
 }
