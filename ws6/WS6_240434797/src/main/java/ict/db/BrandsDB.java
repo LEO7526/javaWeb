@@ -4,11 +4,17 @@ import ict.bean.Brand;
 import ict.bean.Phone;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BrandsDB {
     private String dbUrl;
     private String dbUser;
     private String dbPassword;
+    private static final Logger LOGGER = Logger.getLogger(BrandsDB.class.getName());
+    private static final Map<String, Boolean> INITIALIZED_DBS = new ConcurrentHashMap<>();
 
     public BrandsDB(String dbUrl, String dbUser, String dbPassword) {
         this.dbUrl = dbUrl;
@@ -25,8 +31,21 @@ public class BrandsDB {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "MySQL driver not found", ex);
         }
+    }
+
+    public void initialize() {
+        String key = initializationKey();
+        INITIALIZED_DBS.computeIfAbsent(key, k -> {
+            createPhoneTable();
+            seedSampleData();
+            return Boolean.TRUE;
+        });
+    }
+
+    private String initializationKey() {
+        return dbUrl + "::" + dbUser;
     }
 
     public void createPhoneTable() {
@@ -37,30 +56,27 @@ public class BrandsDB {
                          "brand VARCHAR(50), " +
                          "name VARCHAR(100), " +
                          "img VARCHAR(255), " +
-                         "price DOUBLE)";
+                         "price DOUBLE, " +
+                         "UNIQUE KEY uk_phone_name (name))";
             stmt.executeUpdate(sql);
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to create PHONE table", ex);
         }
     }
 
     public void seedSampleData() {
-        String checkSql = "SELECT COUNT(*) FROM PHONE";
-        String insertSql = "INSERT INTO PHONE (brand, name, img, price) VALUES (?, ?, ?, ?)";
+        // Uses MySQL 8.0.19+ alias syntax for ON DUPLICATE KEY UPDATE
+        String insertSql = "INSERT INTO PHONE (brand, name, img, price) VALUES (?, ?, ?, ?) AS new_values " +
+                           "ON DUPLICATE KEY UPDATE brand=new_values.brand, img=new_values.img, price=new_values.price";
         try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(checkSql)) {
-            if (rs.next() && rs.getInt(1) > 0) {
-                return;
-            }
-            try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
-                addPhone(ps, "Apple", "iPhone 15", "img/iphone15.jpg", 8999);
-                addPhone(ps, "Samsung", "Galaxy S24", "img/galaxy-s24.jpg", 7999);
-                addPhone(ps, "Google", "Pixel 8", "img/pixel8.jpg", 6999);
-                addPhone(ps, "Apple", "iPhone 14", "img/iphone14.jpg", 6999);
-            }
+             PreparedStatement ps = conn.prepareStatement(insertSql)) {
+            addPhone(ps, "Apple", "iPhone 15", "img/iphone15.jpg", 8999);
+            addPhone(ps, "Samsung", "Galaxy S24", "img/galaxy-s24.jpg", 7999);
+            addPhone(ps, "Google", "Pixel 8", "img/pixel8.jpg", 6999);
+            addPhone(ps, "Apple", "iPhone 14", "img/iphone14.jpg", 6999);
+            ps.executeBatch();
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to seed sample phone data", ex);
         }
     }
 
@@ -69,7 +85,7 @@ public class BrandsDB {
         ps.setString(2, name);
         ps.setString(3, img);
         ps.setDouble(4, price);
-        ps.executeUpdate();
+        ps.addBatch();
     }
 
     public ArrayList<Brand> getAllBrands() {
@@ -81,7 +97,7 @@ public class BrandsDB {
                 brands.add(new Brand(rs.getString("brand")));
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to retrieve brands", ex);
         }
         return brands;
     }
@@ -98,7 +114,7 @@ public class BrandsDB {
                 }
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to retrieve phones for brand: " + brand, ex);
         }
         return phones;
     }
