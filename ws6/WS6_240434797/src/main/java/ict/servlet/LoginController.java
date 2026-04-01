@@ -1,3 +1,5 @@
+package ict.servlet;
+
 import ict.bean.UserInfo;
 import ict.db.UserDB;
 import java.io.IOException;
