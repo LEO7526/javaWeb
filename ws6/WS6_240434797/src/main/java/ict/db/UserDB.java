@@ -34,7 +34,7 @@ public class UserDB {
         boolean result = false;
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(
-                 "INSERT INTO USERINFO (id, username, password) VALUES (?, ?, ?)")) {
+                 "INSERT INTO USERINFO (id, username, password) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE id=id")) {
             ps.setString(1, id);
             ps.setString(2, user);
             ps.setString(3, pwd);

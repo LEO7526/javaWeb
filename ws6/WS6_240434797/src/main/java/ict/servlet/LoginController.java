@@ -22,6 +22,8 @@ public class LoginController extends HttpServlet {
         String dbUser = getServletContext().getInitParameter("dbUser");
         String dbPassword = getServletContext().getInitParameter("dbPassword");
         db = new UserDB(dbUrl, dbUser, dbPassword);
+        db.createUserInfoTable();
+        db.addUserInfo("1", "abc", "123");
     }
 
     @Override
