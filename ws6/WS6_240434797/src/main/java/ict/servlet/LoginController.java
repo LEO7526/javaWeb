@@ -24,6 +24,7 @@ public class LoginController extends HttpServlet {
         db = new UserDB(dbUrl, dbUser, dbPassword);
         db.createUserInfoTable();
         db.addUserInfo("1", "abc", "123");
+        db.addUserInfo("2", "xyz", "123");
     }
 
     @Override

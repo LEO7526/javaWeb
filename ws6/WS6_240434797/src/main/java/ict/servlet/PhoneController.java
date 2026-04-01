@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet(name = "PhoneController", urlPatterns = {"/getPhones"})
 public class PhoneController extends HttpServlet {
@@ -22,6 +23,8 @@ public class PhoneController extends HttpServlet {
         String dbUser = getServletContext().getInitParameter("dbUser");
         String dbPassword = getServletContext().getInitParameter("dbPassword");
         db = new BrandsDB(dbUrl, dbUser, dbPassword);
+        db.createPhoneTable();
+        db.seedSampleData();
     }
 
     @Override
@@ -33,6 +36,10 @@ public class PhoneController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (!isAuthenticated(request)) {
+            redirectToLogin(request, response);
+            return;
+        }
         String action = request.getParameter("action");
         if ("list".equals(action)) {
             String brand = request.getParameter("brand");
@@ -47,5 +54,16 @@ public class PhoneController extends HttpServlet {
         } else {
             response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
         }
+    }
+
+    private boolean isAuthenticated(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        return session != null && session.getAttribute("userInfo") != null;
+    }
+
+    private void redirectToLogin(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.jsp");
+        rd.forward(request, response);
     }
 }
