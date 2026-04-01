@@ -65,9 +65,8 @@ public class BrandsDB {
     }
 
     public void seedSampleData() {
-        // Uses MySQL 8.0.19+ alias syntax for ON DUPLICATE KEY UPDATE
-        String insertSql = "INSERT INTO PHONE (brand, name, img, price) VALUES (?, ?, ?, ?) AS new_values " +
-                           "ON DUPLICATE KEY UPDATE brand=new_values.brand, img=new_values.img, price=new_values.price";
+        String insertSql = "INSERT INTO PHONE (brand, name, img, price) VALUES (?, ?, ?, ?) " +
+                           "ON DUPLICATE KEY UPDATE brand=VALUES(brand), img=VALUES(img), price=VALUES(price)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(insertSql)) {
             addPhone(ps, "Apple", "iPhone 15", "img/iphone15.jpg", 8999);
