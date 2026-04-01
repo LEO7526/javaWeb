@@ -1,7 +1,6 @@
 package ict.servlet;
 
 import ict.bean.Phone;
-import ict.servlet.AuthUtil;
 import ict.db.BrandsDB;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,9 +34,6 @@ public class PhoneController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (!AuthUtil.ensureAuthenticated(request, response, getServletContext())) {
-            return;
-        }
         String action = request.getParameter("action");
         if ("list".equals(action)) {
             String brand = request.getParameter("brand");
