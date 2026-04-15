@@ -2,7 +2,7 @@
 <%
 ArrayList<CustomerBean> customers = (ArrayList<CustomerBean>) request.getAttribute("customers");
 if (customers == null) {
-    customers = new ArrayList<>();
+    customers = new ArrayList<CustomerBean>();
 }
 out.println("<h1>Customers</h1>");
 out.println("<p><a href='editCustomer.jsp'>Add Customer</a> | <a href='searchCustomer.jsp'>Search Customer</a></p>");
