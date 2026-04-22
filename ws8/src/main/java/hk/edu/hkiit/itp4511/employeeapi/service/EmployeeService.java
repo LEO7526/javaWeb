@@ -1,8 +1,7 @@
-package hk.edu.hkiit.itp4511.employeeapi.service;
+package hk.edu.hkiit.itp4511.employee_api.service;
 
-import hk.edu.hkiit.itp4511.employeeapi.exception.EmployeeNotFoundException;
-import hk.edu.hkiit.itp4511.employeeapi.model.Employee;
-import hk.edu.hkiit.itp4511.employeeapi.repository.EmployeeRepository;
+import hk.edu.hkiit.itp4511.employee_api.model.Employee;
+import hk.edu.hkiit.itp4511.employee_api.repository.EmployeeRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ public class EmployeeService {
                     employee.setEmail(updatedEmployee.getEmail());
                     return employeeRepository.save(employee);
                 })
-                .orElseThrow(() -> new EmployeeNotFoundException(id));
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
     }
 
     public void deleteEmployee(Long id) {
