@@ -1,5 +1,19 @@
-package hk.edu.hkiit.itp4511.employee_api.controller;
-// import lib 
+package hk.edu.hkiit.itp4511.employeeapi.controller;
+
+import hk.edu.hkiit.itp4511.employeeapi.model.Employee;
+import hk.edu.hkiit.itp4511.employeeapi.service.EmployeeService;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -17,8 +31,7 @@ public class EmployeeController {
         return employeeService.getAllEmployees();
     }
 
-     // methods continue on next slide
-     @GetMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
         return employeeService.getEmployeeById(id)
                 .map(ResponseEntity::ok)
@@ -26,8 +39,8 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Employee createEmployee(@RequestBody Employee employee) {
-        return employeeService.createEmployee(employee);
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.createEmployee(employee));
     }
 
     @PutMapping("/{id}")
