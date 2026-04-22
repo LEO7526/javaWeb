@@ -1,48 +1,47 @@
-package hk.edu.hkiit.itp4511.employeeapi.service;
+package hk.edu.hkiit.itp4511.employee_api.service;
 
-import hk.edu.hkiit.itp4511.employeeapi.exception.EmployeeNotFoundException;
-import hk.edu.hkiit.itp4511.employeeapi.model.Employee;
-import hk.edu.hkiit.itp4511.employeeapi.repository.EmployeeRepository;
+import hk.edu.hkiit.itp4511.employee_api.model.Employee;
+import hk.edu.hkiit.itp4511.employee_api.repository.EmployeeRepository;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
 
+    @Autowired
     public EmployeeService(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
     }
-
-    @Transactional(readOnly = true)
-    public List<Employee> findAll() {
+    // methods continue on next slide
+    public List<Employee> getAllEmployees() {
         return employeeRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
-    public Employee findById(Long id) {
-        return employeeRepository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException(id));
+    public Optional<Employee> getEmployeeById(Long id) {
+        return employeeRepository.findById(id);
     }
 
-    public Employee create(Employee employee) {
-        employee.setId(null);
+    public Employee createEmployee(Employee employee) {
         return employeeRepository.save(employee);
     }
 
-    public Employee update(Long id, Employee employee) {
-        Employee existingEmployee = findById(id);
-        existingEmployee.setFirstName(employee.getFirstName());
-        existingEmployee.setLastName(employee.getLastName());
-        existingEmployee.setEmail(employee.getEmail());
-        return employeeRepository.save(existingEmployee);
+    public Employee updateEmployee(Long id, Employee updatedEmployee) {
+        return employeeRepository.findById(id)
+                .map(employee -> {
+                    employee.setFirstName(updatedEmployee.getFirstName());
+                    employee.setLastName(updatedEmployee.getLastName());
+                    employee.setEmail(updatedEmployee.getEmail());
+                    return employeeRepository.save(employee);
+                })
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
     }
 
-    public void delete(Long id) {
-        Employee existingEmployee = findById(id);
-        employeeRepository.delete(existingEmployee);
+    public void deleteEmployee(Long id) {
+        employeeRepository.deleteById(id);
     }
 }
+
