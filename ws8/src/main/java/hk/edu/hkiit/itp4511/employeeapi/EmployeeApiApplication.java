@@ -1,4 +1,4 @@
-package hk.edu.hkiit.itp4511.employee_api;
+package hk.edu.hkiit.itp4511.employeeapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
