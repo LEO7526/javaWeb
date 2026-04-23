@@ -9,9 +9,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class AppointmentDB {
     private final String dbUrl;
@@ -31,6 +34,9 @@ public class AppointmentDB {
 
     public synchronized Appointment createAppointment(int patientId, int serviceId, LocalDateTime slotTime) {
         if (hasDoubleBooking(patientId, slotTime, -1)) {
+            return null;
+        }
+        if (hasSlotConflict(serviceId, slotTime)) {
             return null;
         }
 
@@ -89,6 +95,32 @@ public class AppointmentDB {
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to cancel appointment", ex);
+        }
+    }
+
+    public synchronized boolean updateAppointmentStatus(int appointmentId, String status) {
+        String sql = "UPDATE appointments SET status = ?, updated_at = ? WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(3, appointmentId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to update appointment status", ex);
+        }
+    }
+
+    public synchronized boolean cancelByClinic(int appointmentId, String reason) {
+        String sql = "UPDATE appointments SET status = 'CANCELLED', cancellation_reason = ?, updated_at = ? WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, reason);
+            ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(3, appointmentId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to cancel appointment by clinic", ex);
         }
     }
 
@@ -162,6 +194,41 @@ public class AppointmentDB {
             }
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to validate appointment duplication", ex);
+        }
+        return false;
+    }
+
+    public Set<LocalDateTime> findBookedSlotTimesByServiceAndDate(int serviceId, LocalDate date) {
+        Set<LocalDateTime> slots = new LinkedHashSet<>();
+        String sql = "SELECT slot_time FROM appointments WHERE service_id = ? AND DATE(slot_time) = ? AND status <> 'CANCELLED' ORDER BY slot_time";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, serviceId);
+            ps.setDate(2, java.sql.Date.valueOf(date));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    slots.add(rs.getTimestamp("slot_time").toLocalDateTime());
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to load booked slots", ex);
+        }
+        return slots;
+    }
+
+    private boolean hasSlotConflict(int serviceId, LocalDateTime slotTime) {
+        String sql = "SELECT COUNT(*) FROM appointments WHERE service_id = ? AND slot_time = ? AND status <> 'CANCELLED'";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, serviceId);
+            ps.setTimestamp(2, Timestamp.valueOf(slotTime));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to validate slot capacity", ex);
         }
         return false;
     }

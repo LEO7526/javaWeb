@@ -5,6 +5,7 @@
 <%@ page import="ict.bean.Notification" %>
 <%@ page import="ict.util.DateTimeUtil" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="ui" tagdir="/WEB-INF/tags/ui" %>
 <%
     User user = (User) request.getAttribute("currentUser");
     List<Appointment> upcomingAppointments = (List<Appointment>) request.getAttribute("upcomingAppointments");
@@ -19,7 +20,7 @@
 </head>
 <body>
 <div class="topbar">
-    <a href="<%= request.getContextPath() %>/patient/dashboard">Dashboard</a>
+    <a class="active" href="<%= request.getContextPath() %>/patient/dashboard">Dashboard</a>
     <a href="<%= request.getContextPath() %>/patient/appointments">Appointments</a>
     <a href="<%= request.getContextPath() %>/patient/queue">Queue</a>
     <a href="<%= request.getContextPath() %>/patient/notifications">Notifications</a>
@@ -27,14 +28,44 @@
     <a href="<%= request.getContextPath() %>/auth/logout">Logout</a>
 </div>
 <div class="container">
-    <div class="card">
-        <h2>Welcome, <%= user.getFullName() %></h2>
-        <p class="muted">Patient portal for appointment booking, queue tracking, and notifications.</p>
+    <div class="hero">
+        <div class="toolbar">
+            <div>
+                <div class="section-title">Patient Portal</div>
+                <h1>Welcome, <%= user.getFullName() %></h1>
+                <p class="muted">Appointment booking, queue tracking, and notifications in one place.</p>
+            </div>
+            <div class="panel-actions">
+                <a class="action-link" href="<%= request.getContextPath() %>/patient/appointments">Book appointment</a>
+                <a class="action-link" href="<%= request.getContextPath() %>/patient/queue">Join queue</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="muted">Upcoming appointments</span>
+            <span class="value"><%= upcomingAppointments.size() %></span>
+        </div>
+        <div class="summary-card">
+            <span class="muted">Active queue entries</span>
+            <span class="value"><%= todayQueue.size() %></span>
+        </div>
+        <div class="summary-card">
+            <span class="muted">Latest notifications</span>
+            <span class="value"><%= Math.min(notifications.size(), 5) %></span>
+        </div>
     </div>
 
     <div class="grid-2">
-        <div class="card">
-            <h3>Upcoming Appointments</h3>
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <div class="section-title">Appointments</div>
+                    <h3>Upcoming visits</h3>
+                </div>
+                <a class="action-link" href="<%= request.getContextPath() %>/patient/appointments">Manage</a>
+            </div>
             <table>
                 <tr><th>ID</th><th>Date/Time</th><th>Status</th></tr>
                 <% if (upcomingAppointments.isEmpty()) { %>
@@ -44,14 +75,20 @@
                 <tr>
                     <td>#<%= appointment.getId() %></td>
                     <td><%= DateTimeUtil.format(appointment.getSlotTime()) %></td>
-                    <td><span class="badge"><%= appointment.getStatus() %></span></td>
+                    <td><ui:statusBadge value="<%= appointment.getStatus() %>" /></td>
                 </tr>
                 <% } %>
             </table>
         </div>
 
-        <div class="card">
-            <h3>Today Queue Status</h3>
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <div class="section-title">Queue</div>
+                    <h3>Today status</h3>
+                </div>
+                <a class="action-link" href="<%= request.getContextPath() %>/patient/queue">Open queue</a>
+            </div>
             <table>
                 <tr><th>Queue #</th><th>Status</th><th>Joined</th></tr>
                 <% if (todayQueue.isEmpty()) { %>
@@ -60,7 +97,7 @@
                 <% for (QueueEntry entry : todayQueue) { %>
                 <tr>
                     <td><%= entry.getQueueNumber() %></td>
-                    <td><span class="badge"><%= entry.getStatus() %></span></td>
+                    <td><ui:statusBadge value="<%= entry.getStatus() %>" /></td>
                     <td><%= DateTimeUtil.format(entry.getJoinedAt()) %></td>
                 </tr>
                 <% } %>
@@ -68,8 +105,14 @@
         </div>
     </div>
 
-    <div class="card">
-        <h3>Latest Notifications</h3>
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="section-title">Notifications</div>
+                <h3>Recent updates</h3>
+            </div>
+            <a class="action-link" href="<%= request.getContextPath() %>/patient/notifications">View all</a>
+        </div>
         <table>
             <tr><th>Time</th><th>Type</th><th>Message</th></tr>
             <% if (notifications.isEmpty()) { %>
@@ -80,7 +123,7 @@
             %>
             <tr>
                 <td><%= DateTimeUtil.format(notification.getCreatedAt()) %></td>
-                <td><%= notification.getType() %></td>
+                <td><ui:statusBadge value="<%= notification.getType() %>" /></td>
                 <td><%= notification.getMessage() %></td>
             </tr>
             <% } %>

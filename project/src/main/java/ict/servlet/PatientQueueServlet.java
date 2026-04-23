@@ -61,6 +61,7 @@ public class PatientQueueServlet extends HttpServlet {
         }
 
         String message;
+        String messageType;
 
         if ("join".equals(action)) {
             try {
@@ -69,17 +70,22 @@ public class PatientQueueServlet extends HttpServlet {
                 ClinicService service = serviceDB.findById(serviceId);
                 notificationDB.create(user.getId(), "QUEUE", "Queue joined for " + service.getServiceName() + ", number: " + entry.getQueueNumber());
                 message = "Joined queue successfully.";
+                messageType = "success";
             } catch (Exception ex) {
                 message = "Queue join failed.";
+                messageType = "error";
             }
         } else if ("list".equals(action)) {
             message = null;
+            messageType = null;
         } else {
             message = "Unsupported queue action.";
+            messageType = "error";
         }
 
         if (message != null) {
             request.setAttribute("message", message);
+            request.setAttribute("messageType", messageType == null ? "success" : messageType);
         }
         loadPageData(request, user);
         RequestDispatcher rd = getServletContext().getRequestDispatcher("/WEB-INF/jsp/patient/queue.jsp");

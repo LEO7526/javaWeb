@@ -116,6 +116,18 @@ public class QueueDB {
         return 0;
     }
 
+    public synchronized boolean updateQueueStatus(int queueId, String status) {
+        String sql = "UPDATE queue_entries SET status = ? WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, queueId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to update queue status", ex);
+        }
+    }
+
     private QueueEntry findById(int id) {
         String sql = "SELECT id, patient_id, service_id, queue_date, queue_number, status, joined_at FROM queue_entries WHERE id = ?";
         try (Connection conn = getConnection();

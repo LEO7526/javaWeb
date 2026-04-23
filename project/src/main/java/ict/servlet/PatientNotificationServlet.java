@@ -42,6 +42,8 @@ public class PatientNotificationServlet extends HttpServlet {
 
         if ("true".equalsIgnoreCase(request.getParameter("markRead"))) {
             notificationDB.markAllRead(user.getId());
+            request.setAttribute("message", "All notifications marked as read.");
+            request.setAttribute("messageType", "success");
         }
 
         request.setAttribute("currentUser", user);

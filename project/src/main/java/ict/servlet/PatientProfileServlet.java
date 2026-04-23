@@ -53,6 +53,7 @@ public class PatientProfileServlet extends HttpServlet {
         }
 
         String message;
+        String messageType;
 
         switch (action) {
             case "updateProfile":
@@ -64,6 +65,7 @@ public class PatientProfileServlet extends HttpServlet {
                 );
                 notificationDB.create(user.getId(), "PROFILE", "Profile updated successfully.");
                 message = "Profile updated.";
+                messageType = "success";
                 break;
             case "changePassword":
                 boolean changed = userDB.updatePassword(
@@ -74,20 +76,25 @@ public class PatientProfileServlet extends HttpServlet {
                 if (changed) {
                     notificationDB.create(user.getId(), "PROFILE", "Password changed successfully.");
                     message = "Password updated.";
+                    messageType = "success";
                 } else {
                     message = "Password update failed. Check current password.";
+                    messageType = "warning";
                 }
                 break;
             case "view":
                 message = null;
+                messageType = null;
                 break;
             default:
                 message = "Unsupported profile action.";
+                messageType = "error";
                 break;
         }
 
         if (message != null) {
             request.setAttribute("message", message);
+            request.setAttribute("messageType", messageType == null ? "success" : messageType);
         }
         request.setAttribute("currentUser", userDB.findById(user.getId()));
         RequestDispatcher rd = getServletContext().getRequestDispatcher("/WEB-INF/jsp/patient/profile.jsp");
