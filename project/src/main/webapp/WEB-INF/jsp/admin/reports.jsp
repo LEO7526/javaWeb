@@ -93,7 +93,7 @@
             </div>
             <div class="col-sm-3">
                 <div class="card border-0 shadow-sm p-3 text-center">
-                    <div class="text-muted small">No-shows</div>
+                    <div class="text-muted small">No-Show</div>
                     <div class="h4 fw-bold text-warning"><%= grandNoShow %></div>
                 </div>
             </div>

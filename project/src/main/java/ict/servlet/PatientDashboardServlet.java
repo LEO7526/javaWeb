@@ -76,7 +76,7 @@ public class PatientDashboardServlet extends HttpServlet {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime cutoff = now.plusHours(24);
         for (Appointment appt : upcoming) {
-            if (!appt.getSlotTime().isAfter(cutoff)) {
+            if (appt.getSlotTime().isAfter(now) && !appt.getSlotTime().isAfter(cutoff)) {
                 ClinicService svc = serviceDB.findById(appt.getServiceId());
                 String serviceName = svc != null ? svc.getClinicName() + " - " + svc.getServiceName() : "service";
                 String reminderMsg = "Reminder: Your appointment for " + serviceName
