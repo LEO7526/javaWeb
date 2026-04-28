@@ -110,6 +110,26 @@ public final class SchemaDB {
                     + "created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
                     + ")");
 
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS policy_settings ("
+                    + "id INT PRIMARY KEY AUTO_INCREMENT,"
+                    + "policy_key VARCHAR(100) NOT NULL UNIQUE,"
+                    + "policy_value VARCHAR(255) NOT NULL,"
+                    + "description VARCHAR(255),"
+                    + "updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+                    + ")");
+
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS audit_log ("
+                    + "id INT PRIMARY KEY AUTO_INCREMENT,"
+                    + "user_id INT NOT NULL,"
+                    + "action_type VARCHAR(50) NOT NULL,"
+                    + "target_type VARCHAR(50),"
+                    + "target_id INT,"
+                    + "description VARCHAR(500),"
+                    + "created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                    + "INDEX idx_audit_user (user_id),"
+                    + "CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users(id)"
+                    + ")");
+
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS clinic_service ("
                     + "id INT PRIMARY KEY AUTO_INCREMENT,"
                     + "clinic_name VARCHAR(100) NOT NULL,"
@@ -167,8 +187,12 @@ public final class SchemaDB {
     }
 
     private static void seedData(Connection conn) throws SQLException {
+        seedUser(conn, "admin", "admin123", "System Administrator", "10000000", "admin@cchc.hk", "ADMIN");
         seedUser(conn, "staff", "staff123", "Lee Ming Tan", "12345678", "LeeMingTan.cchc.edu.hk", "STAFF");
         seedUser(conn, "patient", "patient123", "Chan Tai Man", "87654321", "ChanTaiMan@gmail.com", "PATIENT");
+        seedPolicySetting(conn, "max_active_bookings_per_patient", "1", "Maximum number of active future bookings per patient");
+        seedPolicySetting(conn, "cancellation_cutoff_hours", "24", "Hours before appointment that cancellation is still allowed");
+        seedPolicySetting(conn, "queue_enabled", "true", "Whether walk-in queue is globally enabled");
 
         seedService(conn, "Central Clinic", "General Consultation", 40, 1, DEFAULT_OPEN_TIME, DEFAULT_CLOSE_TIME);
         seedService(conn, "Central Clinic", "Vaccination", 25, 1, DEFAULT_OPEN_TIME, DEFAULT_CLOSE_TIME);
@@ -194,6 +218,25 @@ public final class SchemaDB {
             ps.setString(4, phone);
             ps.setString(5, email);
             ps.setString(6, role);
+            ps.executeUpdate();
+        }
+    }
+
+    private static void seedPolicySetting(Connection conn, String key, String value, String description) throws SQLException {
+        String checkSql = "SELECT id FROM policy_settings WHERE policy_key = ?";
+        try (PreparedStatement check = conn.prepareStatement(checkSql)) {
+            check.setString(1, key);
+            try (ResultSet rs = check.executeQuery()) {
+                if (rs.next()) {
+                    return;
+                }
+            }
+        }
+        String insertSql = "INSERT INTO policy_settings (policy_key, policy_value, description) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+            ps.setString(1, key);
+            ps.setString(2, value);
+            ps.setString(3, description);
             ps.executeUpdate();
         }
     }
