@@ -33,7 +33,6 @@
             <div>
                 <div class="section-title">Patient Portal</div>
                 <h1>Welcome, <%= user.getFullName() %></h1>
-                <p class="muted">Appointment booking, queue tracking, and notifications in one place.</p>
             </div>
             <div class="panel-actions">
                 <a class="action-link" href="<%= request.getContextPath() %>/patient/appointments">Book appointment</a>

@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,11 +67,19 @@ public class PatientQueueServlet extends HttpServlet {
         if ("join".equals(action)) {
             try {
                 int serviceId = Integer.parseInt(request.getParameter("serviceId"));
-                QueueEntry entry = queueDB.joinTodayQueue(user.getId(), serviceId);
                 ClinicService service = serviceDB.findById(serviceId);
-                notificationDB.create(user.getId(), "QUEUE", "Queue joined for " + service.getServiceName() + ", number: " + entry.getQueueNumber());
-                message = "Joined queue successfully.";
-                messageType = "success";
+                if (service == null) {
+                    message = "Selected service is not available.";
+                    messageType = "warning";
+                } else if (!isQueueJoinAllowed(service)) {
+                    message = "Queue is open only from clinic opening time until one hour before closing time.";
+                    messageType = "warning";
+                } else {
+                    QueueEntry entry = queueDB.joinTodayQueue(user.getId(), serviceId);
+                    notificationDB.create(user.getId(), "QUEUE", "Queue joined for " + service.getServiceName() + ", number: " + entry.getQueueNumber());
+                    message = "Joined queue successfully.";
+                    messageType = "success";
+                }
             } catch (Exception ex) {
                 message = "Queue join failed.";
                 messageType = "error";
@@ -103,6 +112,14 @@ public class PatientQueueServlet extends HttpServlet {
         request.setAttribute("myQueue", myQueue);
         request.setAttribute("waitEstimate", waitEstimate);
         request.setAttribute("currentUser", user);
+        request.setAttribute("selectedServiceId", request.getParameter("serviceId"));
+    }
+
+    private boolean isQueueJoinAllowed(ClinicService service) {
+        LocalTime now = LocalTime.now();
+        LocalTime openingTime = service.getOpeningTime();
+        LocalTime cutoffTime = service.getClosingTime().minusHours(1);
+        return !now.isBefore(openingTime) && now.isBefore(cutoffTime);
     }
 
     private boolean isBlank(String value) {

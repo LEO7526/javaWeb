@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalTime;
 
 public class ClinicServiceDB {
     private final String dbUrl;
@@ -28,7 +29,7 @@ public class ClinicServiceDB {
 
     public List<ClinicService> findAll() {
         List<ClinicService> list = new ArrayList<>();
-        String sql = "SELECT id, clinic_name, service_name, daily_quota FROM clinic_service ORDER BY clinic_name, service_name";
+        String sql = "SELECT id, clinic_name, service_name, daily_quota, slot_capacity, opening_time, closing_time FROM clinic_service ORDER BY clinic_name, service_name";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -37,7 +38,10 @@ public class ClinicServiceDB {
                         rs.getInt("id"),
                         rs.getString("clinic_name"),
                         rs.getString("service_name"),
-                        rs.getInt("daily_quota")
+                    rs.getInt("daily_quota"),
+                    rs.getInt("slot_capacity"),
+                    readTime(rs, "opening_time", LocalTime.of(9, 0)),
+                    readTime(rs, "closing_time", LocalTime.of(17, 0))
                 ));
             }
         } catch (SQLException ex) {
@@ -47,7 +51,7 @@ public class ClinicServiceDB {
     }
 
     public ClinicService findById(int id) {
-        String sql = "SELECT id, clinic_name, service_name, daily_quota FROM clinic_service WHERE id = ?";
+        String sql = "SELECT id, clinic_name, service_name, daily_quota, slot_capacity, opening_time, closing_time FROM clinic_service WHERE id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -57,7 +61,10 @@ public class ClinicServiceDB {
                             rs.getInt("id"),
                             rs.getString("clinic_name"),
                             rs.getString("service_name"),
-                            rs.getInt("daily_quota")
+                            rs.getInt("daily_quota"),
+                            rs.getInt("slot_capacity"),
+                            readTime(rs, "opening_time", LocalTime.of(9, 0)),
+                            readTime(rs, "closing_time", LocalTime.of(17, 0))
                     );
                 }
             }
@@ -65,6 +72,11 @@ public class ClinicServiceDB {
             throw new RuntimeException("Failed to load clinic service", ex);
         }
         return null;
+    }
+
+    private LocalTime readTime(ResultSet rs, String column, LocalTime fallback) throws SQLException {
+        java.sql.Time time = rs.getTime(column);
+        return time == null ? fallback : time.toLocalTime();
     }
 }
 

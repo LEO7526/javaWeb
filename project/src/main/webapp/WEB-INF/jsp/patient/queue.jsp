@@ -12,6 +12,7 @@
     List<ClinicService> services = (List<ClinicService>) request.getAttribute("services");
     List<QueueEntry> myQueue = (List<QueueEntry>) request.getAttribute("myQueue");
     Map<Integer, Integer> waitEstimate = (Map<Integer, Integer>) request.getAttribute("waitEstimate");
+    String selectedServiceId = (String) request.getAttribute("selectedServiceId");
     String message = (String) request.getAttribute("message");
     String messageType = (String) request.getAttribute("messageType");
     if (messageType == null) {
@@ -45,7 +46,6 @@
                 <h1>Same-day walk-in queue</h1>
                 <p class="muted">Join queue with one click and track status updates in near real-time.</p>
             </div>
-            <a class="action-link" href="#join-panel">Join queue</a>
         </div>
     </div>
 
@@ -83,12 +83,13 @@
         <% if (message != null) { %>
             <div class="alert alert-<%= messageType %>"><%= message %></div>
         <% } %>
+        <p class="muted" style="margin-top:0;">Queue opens at each clinic opening time and closes one hour before that clinic shuts for the day.</p>
         <form method="post" action="<%= request.getContextPath() %>/patient/queue">
             <input type="hidden" name="action" value="join"/>
             <label>Select Service to Join Queue</label>
             <select name="serviceId" required>
                 <% for (ClinicService service : services) { %>
-                    <option value="<%= service.getId() %>"><%= service.getClinicName() %> - <%= service.getServiceName() %></option>
+                    <option value="<%= service.getId() %>" <%= String.valueOf(service.getId()).equals(selectedServiceId) ? "selected" : "" %>><%= service.getClinicName() %> - <%= service.getServiceName() %> (<%= service.getOpeningTime() %>-<%= service.getClosingTime() %>)</option>
                 <% } %>
             </select>
             <button type="submit">Join Queue</button>

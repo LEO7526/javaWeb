@@ -6,9 +6,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.time.LocalTime;
 
 public final class SchemaDB {
     private static boolean initialized = false;
+    private static final LocalTime DEFAULT_OPEN_TIME = LocalTime.of(9, 0);
+    private static final LocalTime DEFAULT_CLOSE_TIME = LocalTime.of(17, 0);
 
     private SchemaDB() {
     }
@@ -110,8 +114,16 @@ public final class SchemaDB {
                     + "id INT PRIMARY KEY AUTO_INCREMENT,"
                     + "clinic_name VARCHAR(100) NOT NULL,"
                     + "service_name VARCHAR(100) NOT NULL,"
-                    + "daily_quota INT NOT NULL"
+                    + "daily_quota INT NOT NULL,"
+                    + "slot_capacity INT NOT NULL DEFAULT 1,"
+                    + "opening_time TIME NOT NULL DEFAULT '09:00:00',"
+                    + "closing_time TIME NOT NULL DEFAULT '17:00:00'"
                     + ")");
+
+                stmt.executeUpdate("ALTER TABLE clinic_service ADD COLUMN IF NOT EXISTS slot_capacity INT NOT NULL DEFAULT 1");
+                stmt.executeUpdate("ALTER TABLE clinic_service ADD COLUMN IF NOT EXISTS opening_time TIME NOT NULL DEFAULT '09:00:00'");
+                stmt.executeUpdate("ALTER TABLE clinic_service ADD COLUMN IF NOT EXISTS closing_time TIME NOT NULL DEFAULT '17:00:00'");
+                stmt.executeUpdate("UPDATE clinic_service SET slot_capacity = COALESCE(slot_capacity, 1), opening_time = COALESCE(opening_time, '09:00:00'), closing_time = COALESCE(closing_time, '17:00:00')");
 
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS appointments ("
                     + "id INT PRIMARY KEY AUTO_INCREMENT,"
@@ -155,12 +167,12 @@ public final class SchemaDB {
     }
 
     private static void seedData(Connection conn) throws SQLException {
-        seedUser(conn, "staff", "staff123", "Staff Demo", "90000001", "staff@cchc.local", "STAFF");
-        seedUser(conn, "patient", "patient123", "Patient Demo", "90000002", "patient@cchc.local", "PATIENT");
+        seedUser(conn, "staff", "staff123", "Lee Ming Tan", "12345678", "LeeMingTan.cchc.edu.hk", "STAFF");
+        seedUser(conn, "patient", "patient123", "Chan Tai Man", "87654321", "ChanTaiMan@gmail.com", "PATIENT");
 
-        seedService(conn, "Central Clinic", "General Consultation", 40);
-        seedService(conn, "Central Clinic", "Vaccination", 25);
-        seedService(conn, "North Point Clinic", "Dental Check", 20);
+        seedService(conn, "Central Clinic", "General Consultation", 40, 1, DEFAULT_OPEN_TIME, DEFAULT_CLOSE_TIME);
+        seedService(conn, "Central Clinic", "Vaccination", 25, 1, DEFAULT_OPEN_TIME, DEFAULT_CLOSE_TIME);
+        seedService(conn, "North Point Clinic", "Dental Check", 20, 1, DEFAULT_OPEN_TIME, DEFAULT_CLOSE_TIME);
     }
 
     private static void seedUser(Connection conn, String username, String password, String fullName, String phone, String email, String role) throws SQLException {
@@ -186,23 +198,34 @@ public final class SchemaDB {
         }
     }
 
-    private static void seedService(Connection conn, String clinicName, String serviceName, int dailyQuota) throws SQLException {
+    private static void seedService(Connection conn, String clinicName, String serviceName, int dailyQuota, int slotCapacity, LocalTime openingTime, LocalTime closingTime) throws SQLException {
         String checkSql = "SELECT id FROM clinic_service WHERE clinic_name = ? AND service_name = ?";
         try (PreparedStatement check = conn.prepareStatement(checkSql)) {
             check.setString(1, clinicName);
             check.setString(2, serviceName);
             try (ResultSet rs = check.executeQuery()) {
                 if (rs.next()) {
+                    try (PreparedStatement update = conn.prepareStatement("UPDATE clinic_service SET daily_quota = ?, slot_capacity = ?, opening_time = ?, closing_time = ? WHERE id = ?")) {
+                        update.setInt(1, dailyQuota);
+                        update.setInt(2, slotCapacity);
+                        update.setTime(3, Time.valueOf(openingTime));
+                        update.setTime(4, Time.valueOf(closingTime));
+                        update.setInt(5, rs.getInt("id"));
+                        update.executeUpdate();
+                    }
                     return;
                 }
             }
         }
 
-        String insertSql = "INSERT INTO clinic_service (clinic_name, service_name, daily_quota) VALUES (?, ?, ?)";
+        String insertSql = "INSERT INTO clinic_service (clinic_name, service_name, daily_quota, slot_capacity, opening_time, closing_time) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
             ps.setString(1, clinicName);
             ps.setString(2, serviceName);
             ps.setInt(3, dailyQuota);
+            ps.setInt(4, slotCapacity);
+            ps.setTime(5, Time.valueOf(openingTime));
+            ps.setTime(6, Time.valueOf(closingTime));
             ps.executeUpdate();
         }
     }

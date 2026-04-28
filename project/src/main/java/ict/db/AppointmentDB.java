@@ -12,8 +12,10 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class AppointmentDB {
@@ -32,11 +34,14 @@ public class AppointmentDB {
         return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
     }
 
-    public synchronized Appointment createAppointment(int patientId, int serviceId, LocalDateTime slotTime) {
+    public synchronized Appointment createAppointment(int patientId, int serviceId, LocalDateTime slotTime, int slotCapacity) {
+        if (hasActiveFutureAppointment(patientId)) {
+            return null;
+        }
         if (hasDoubleBooking(patientId, slotTime, -1)) {
             return null;
         }
-        if (hasSlotConflict(serviceId, slotTime)) {
+        if (hasSlotConflict(serviceId, slotTime, slotCapacity)) {
             return null;
         }
 
@@ -216,7 +221,42 @@ public class AppointmentDB {
         return slots;
     }
 
-    private boolean hasSlotConflict(int serviceId, LocalDateTime slotTime) {
+    public Map<LocalDateTime, Integer> findBookedSlotCountsByServiceAndDate(int serviceId, LocalDate date) {
+        Map<LocalDateTime, Integer> counts = new LinkedHashMap<>();
+        String sql = "SELECT slot_time, COUNT(*) AS booking_count FROM appointments WHERE service_id = ? AND DATE(slot_time) = ? AND status <> 'CANCELLED' GROUP BY slot_time ORDER BY slot_time";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, serviceId);
+            ps.setDate(2, java.sql.Date.valueOf(date));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    counts.put(rs.getTimestamp("slot_time").toLocalDateTime(), rs.getInt("booking_count"));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to load booked slot counts", ex);
+        }
+        return counts;
+    }
+
+    public boolean hasActiveFutureAppointment(int patientId) {
+        String sql = "SELECT COUNT(*) FROM appointments WHERE patient_id = ? AND slot_time >= ? AND status <> 'CANCELLED'";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, patientId);
+            ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to validate patient capacity", ex);
+        }
+        return false;
+    }
+
+    public boolean hasSlotConflict(int serviceId, LocalDateTime slotTime, int slotCapacity) {
         String sql = "SELECT COUNT(*) FROM appointments WHERE service_id = ? AND slot_time = ? AND status <> 'CANCELLED'";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -224,7 +264,7 @@ public class AppointmentDB {
             ps.setTimestamp(2, Timestamp.valueOf(slotTime));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1) > 0;
+                    return rs.getInt(1) >= slotCapacity;
                 }
             }
         } catch (SQLException ex) {

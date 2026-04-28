@@ -21,15 +21,15 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @WebServlet("/patient/appointments")
 public class PatientAppointmentServlet extends HttpServlet {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final LocalTime CLINIC_OPEN = LocalTime.of(9, 0);
-    private static final LocalTime CLINIC_CLOSE = LocalTime.of(17, 0);
     private static final int SLOT_MINUTES = 30;
+    private static final int BOOKING_CUTOFF_HOURS = 24;
 
     private AppointmentDB appointmentDB;
     private ClinicServiceDB serviceDB;
@@ -76,21 +76,74 @@ public class PatientAppointmentServlet extends HttpServlet {
             switch (action) {
                 case "book":
                     int serviceId = Integer.parseInt(request.getParameter("serviceId"));
+                    String selectedClinic = normalize(request.getParameter("clinic"));
                     LocalDateTime slotTime = LocalDateTime.parse(request.getParameter("slotTime"));
-                    Appointment appointment = appointmentDB.createAppointment(user.getId(), serviceId, slotTime);
+                    ClinicService bookedService = serviceDB.findById(serviceId);
+                    if (!isServiceSelectionValid(selectedClinic, bookedService)) {
+                        message = "Please choose a clinic and matching service before booking.";
+                        messageType = "warning";
+                        break;
+                    }
+                    if (bookedService == null) {
+                        message = "Selected service is not available.";
+                        messageType = "warning";
+                        break;
+                    }
+                    if (!isBookableSlot(bookedService, slotTime)) {
+                        message = "Booking is only allowed at least 24 hours in advance.";
+                        messageType = "warning";
+                        break;
+                    }
+                    if (appointmentDB.hasActiveFutureAppointment(user.getId())) {
+                        message = "You already have an active future appointment.";
+                        messageType = "warning";
+                        break;
+                    }
+                    if (appointmentDB.hasSlotConflict(serviceId, slotTime, bookedService.getSlotCapacity())) {
+                        message = "Selected slot is full.";
+                        messageType = "warning";
+                        break;
+                    }
+                    Appointment appointment = appointmentDB.createAppointment(user.getId(), serviceId, slotTime, bookedService.getSlotCapacity());
                     if (appointment == null) {
-                        message = "Booking failed: duplicated appointment timeslot.";
+                        message = "Booking failed: capacity limit reached or duplicate booking detected.";
                         messageType = "error";
                     } else {
-                        ClinicService service = serviceDB.findById(serviceId);
-                        notificationDB.create(user.getId(), "APPOINTMENT", "Appointment booked: " + service.getServiceName());
-                        message = "Appointment booked successfully.";
-                        messageType = "success";
+                        notificationDB.create(user.getId(), "APPOINTMENT", "Appointment booked: " + bookedService.getServiceName());
+                        request.setAttribute("currentUser", user);
+                        request.setAttribute("appointment", appointment);
+                        request.setAttribute("service", bookedService);
+                        request.setAttribute("bookingCutoffHours", BOOKING_CUTOFF_HOURS);
+                        RequestDispatcher rd = getServletContext().getRequestDispatcher("/WEB-INF/jsp/patient/appointment-confirmation.jsp");
+                        rd.forward(request, response);
+                        return;
                     }
                     break;
                 case "reschedule":
                     int appointmentId = Integer.parseInt(request.getParameter("appointmentId"));
                     LocalDateTime newSlot = LocalDateTime.parse(request.getParameter("newSlot"));
+                    Appointment existingAppointment = appointmentDB.findById(appointmentId);
+                    if (existingAppointment == null || existingAppointment.getPatientId() != user.getId()) {
+                        message = "Appointment not found.";
+                        messageType = "warning";
+                        break;
+                    }
+                    ClinicService appointmentService = serviceDB.findById(existingAppointment.getServiceId());
+                    if (appointmentService == null) {
+                        message = "Appointment service is not available.";
+                        messageType = "warning";
+                        break;
+                    }
+                    if (!isBookableSlot(appointmentService, newSlot)) {
+                        message = "Reschedule is only allowed at least 24 hours in advance.";
+                        messageType = "warning";
+                        break;
+                    }
+                    if (appointmentDB.hasSlotConflict(appointmentService.getId(), newSlot, appointmentService.getSlotCapacity())) {
+                        message = "Selected reschedule slot is full.";
+                        messageType = "warning";
+                        break;
+                    }
                     boolean rescheduled = appointmentDB.rescheduleAppointment(appointmentId, user.getId(), newSlot);
                     if (rescheduled) {
                         notificationDB.create(user.getId(), "APPOINTMENT", "Your appointment was rescheduled.");
@@ -167,21 +220,29 @@ public class PatientAppointmentServlet extends HttpServlet {
             selectedService = serviceDB.findById(serviceId);
             if (selectedService != null && isBlank(selectedClinic)) {
                 selectedClinic = selectedService.getClinicName();
+            } else if (selectedService != null && !isBlank(selectedClinic) && !selectedClinic.equals(selectedService.getClinicName())) {
+                selectedService = null;
+                selectedServiceId = null;
+                request.setAttribute("message", "Please choose a service that belongs to the selected clinic.");
+                request.setAttribute("messageType", "warning");
             }
         }
 
         List<LocalDateTime> availableSlots = buildAvailableSlots(selectedService, selectedLocalDate);
         List<Appointment> appointments = appointmentDB.findByPatient(user.getId());
+        LocalDate earliestBookableDate = LocalDate.now().plusDays(1);
 
         request.setAttribute("clinicOptions", clinicOptions);
         request.setAttribute("appointments", appointments);
         request.setAttribute("availableSlots", availableSlots);
         request.setAttribute("selectedClinic", selectedClinic);
         request.setAttribute("selectedServiceId", selectedServiceId);
-        request.setAttribute("selectedDate", selectedLocalDate == null ? LocalDate.now().format(DATE_FORMAT) : selectedLocalDate.format(DATE_FORMAT));
+        request.setAttribute("selectedDate", selectedLocalDate == null ? earliestBookableDate.format(DATE_FORMAT) : selectedLocalDate.format(DATE_FORMAT));
         request.setAttribute("selectedService", selectedService);
         request.setAttribute("currentUser", user);
         request.setAttribute("services", services);
+        request.setAttribute("allServices", allServices);
+        request.setAttribute("earliestBookingDate", earliestBookableDate.format(DATE_FORMAT));
     }
 
     private List<LocalDateTime> buildAvailableSlots(ClinicService selectedService, LocalDate selectedDate) {
@@ -190,17 +251,66 @@ public class PatientAppointmentServlet extends HttpServlet {
             return slots;
         }
 
-        Set<LocalDateTime> bookedSlots = appointmentDB.findBookedSlotTimesByServiceAndDate(selectedService.getId(), selectedDate);
-        LocalDateTime cursor = selectedDate.atTime(CLINIC_OPEN);
-        LocalDateTime end = selectedDate.atTime(CLINIC_CLOSE);
+        LocalDateTime minimumBookableDateTime = LocalDateTime.now().plusHours(BOOKING_CUTOFF_HOURS);
+        LocalDate minimumBookableDate = minimumBookableDateTime.toLocalDate();
+        if (selectedDate.isBefore(minimumBookableDate)) {
+            return slots;
+        }
+
+        Map<LocalDateTime, Integer> bookedSlotCounts = appointmentDB.findBookedSlotCountsByServiceAndDate(selectedService.getId(), selectedDate);
+        LocalDateTime cursor = selectedDate.atTime(selectedService.getOpeningTime());
+        LocalDateTime end = selectedDate.atTime(selectedService.getClosingTime());
+
+        if (selectedDate.equals(minimumBookableDate)) {
+            cursor = alignToNextSlot(minimumBookableDateTime);
+            if (cursor.isBefore(selectedDate.atTime(selectedService.getOpeningTime()))) {
+                cursor = selectedDate.atTime(selectedService.getOpeningTime());
+            }
+        }
 
         while (cursor.isBefore(end)) {
-            if (!bookedSlots.contains(cursor)) {
+            int bookedCount = bookedSlotCounts.getOrDefault(cursor, 0);
+            if (bookedCount < selectedService.getSlotCapacity()) {
                 slots.add(cursor);
             }
             cursor = cursor.plusMinutes(SLOT_MINUTES);
         }
         return slots;
+    }
+
+    private LocalDateTime alignToNextSlot(LocalDateTime time) {
+        LocalDateTime normalized = time.withSecond(0).withNano(0);
+        int minute = normalized.getMinute();
+        int remainder = minute % SLOT_MINUTES;
+        if (remainder == 0 && time.getSecond() == 0 && time.getNano() == 0) {
+            return normalized;
+        }
+        int minutesToAdd = remainder == 0 ? SLOT_MINUTES : SLOT_MINUTES - remainder;
+        return normalized.plusMinutes(minutesToAdd);
+    }
+
+    private boolean isBookableSlot(ClinicService service, LocalDateTime slotTime) {
+        if (service == null || slotTime == null) {
+            return false;
+        }
+
+        LocalDateTime minimumBookableDateTime = LocalDateTime.now().plusHours(BOOKING_CUTOFF_HOURS);
+        LocalDateTime start = slotTime.toLocalDate().atTime(service.getOpeningTime());
+        LocalDateTime end = slotTime.toLocalDate().atTime(service.getClosingTime());
+        if (slotTime.isBefore(minimumBookableDateTime)) {
+            return false;
+        }
+        if (slotTime.isBefore(start)) {
+            return false;
+        }
+        return !slotTime.plusMinutes(SLOT_MINUTES).isAfter(end);
+    }
+
+    private boolean isServiceSelectionValid(String selectedClinic, ClinicService selectedService) {
+        if (selectedService == null) {
+            return false;
+        }
+        return isBlank(selectedClinic) || selectedClinic.equals(selectedService.getClinicName());
     }
 
     private String normalize(String value) {

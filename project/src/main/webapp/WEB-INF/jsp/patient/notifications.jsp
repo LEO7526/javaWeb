@@ -80,7 +80,7 @@
             <tr>
                 <td><%= DateTimeUtil.format(notification.getCreatedAt()) %></td>
                 <td><ui:statusBadge value="<%= notification.getType() %>" /></td>
-                <td><ui:statusBadge value="<%= notification.isRead() ? "Read" : "Unread" %>" /></td>
+                <td><ui:statusBadge value="<%= notification.isRead() ? \"Read\" : \"Unread\" %>" /></td>
                 <td><%= notification.getMessage() %></td>
             </tr>
             <% } %>

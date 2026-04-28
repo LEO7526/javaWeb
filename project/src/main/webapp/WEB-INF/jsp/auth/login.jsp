@@ -12,7 +12,6 @@
 <div class="container">
     <div class="card" style="max-width: 480px; margin: 30px auto;">
         <h2>Login</h2>
-        <p class="muted">Demo patient: patient / patient123. Demo staff: staff / staff123.</p>
         <% if (request.getAttribute("error") != null) { %>
             <div class="error"><%= request.getAttribute("error") %></div>
         <% } %>
@@ -23,7 +22,7 @@
             <input type="password" name="password" required/>
             <button type="submit">Sign In</button>
         </form>
-        <p><a href="<%= request.getContextPath() %>/auth/register">Create Patient Account</a></p>
+        <p><a href="<%= request.getContextPath() %>/auth/register">Create Account</a></p>
     </div>
 </div>
 </body>

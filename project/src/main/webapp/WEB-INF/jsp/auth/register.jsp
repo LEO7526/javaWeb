@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Patient Registration</title>
+    <title>Sign Up</title>
     <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/app.css"/>
 </head>
 <body>
