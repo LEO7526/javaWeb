@@ -67,6 +67,27 @@ public class NotificationDB {
         return list;
     }
 
+    /**
+     * Creates a notification only if no unread notification with the same message already exists
+     * for the user. Prevents duplicate reminders on repeated dashboard loads.
+     */
+    public synchronized void createIfAbsent(int userId, String type, String message) {
+        String checkSql = "SELECT id FROM notifications WHERE user_id = ? AND message = ? AND is_read = 0";
+        try (Connection conn = getConnection();
+             PreparedStatement check = conn.prepareStatement(checkSql)) {
+            check.setInt(1, userId);
+            check.setString(2, message);
+            try (ResultSet rs = check.executeQuery()) {
+                if (rs.next()) {
+                    return;
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to check notification", ex);
+        }
+        create(userId, type, message);
+    }
+
     public synchronized void markAllRead(int userId) {
         String sql = "UPDATE notifications SET is_read = 1 WHERE user_id = ?";
         try (Connection conn = getConnection();

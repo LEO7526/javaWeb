@@ -117,6 +117,10 @@ public class AuthServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/staff/template");
             return;
         }
+        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            return;
+        }
         response.sendRedirect(request.getContextPath() + "/patient/dashboard");
     }
 
