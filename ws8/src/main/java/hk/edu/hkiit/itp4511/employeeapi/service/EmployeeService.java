@@ -1,7 +1,7 @@
-package hk.edu.hkiit.itp4511.employee_api.service;
+package hk.edu.hkiit.itp4511.employeeapi.service;
 
-import hk.edu.hkiit.itp4511.employee_api.model.Employee;
-import hk.edu.hkiit.itp4511.employee_api.repository.EmployeeRepository;
+import hk.edu.hkiit.itp4511.employeeapi.model.Employee;
+import hk.edu.hkiit.itp4511.employeeapi.repository.EmployeeRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
